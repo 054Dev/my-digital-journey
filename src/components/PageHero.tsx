@@ -1,4 +1,6 @@
 import { motion } from "framer-motion";
+import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PageHeroProps {
   image: string;
@@ -8,13 +10,17 @@ interface PageHeroProps {
 }
 
 const PageHero = ({ image, title, subtitle, alt }: PageHeroProps) => {
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <section className="page-hero">
+      {!loaded && <Skeleton className="absolute inset-0 w-full h-full" />}
       <img
         src={image}
         alt={alt}
-        className="absolute inset-0 w-full h-full object-cover"
-        loading="eager"
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
       />
       <div className="page-hero-overlay" />
       <div className="page-hero-content">
