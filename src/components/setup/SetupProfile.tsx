@@ -28,7 +28,11 @@ const SetupProfile = () => {
   const handleSave = async () => {
     if (!settings) return;
     setSaving(true);
-    const { error } = await supabase.from("site_settings").update(form).eq("id", settings.id);
+    const updateData: Record<string, string> = { ...form };
+    delete updateData.id;
+    delete updateData.created_at;
+    delete updateData.updated_at;
+    const { error } = await supabase.from("site_settings").update(updateData as any).eq("id", settings.id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else {
       toast({ title: "Saved!", description: "Profile settings updated." });

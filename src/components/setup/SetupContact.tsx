@@ -27,7 +27,11 @@ const SetupContact = () => {
 
   const save = async () => {
     if (!contact) return;
-    const { error } = await supabase.from("contact_info").update(form).eq("id", contact.id);
+    const updateData = { ...form };
+    delete updateData.id;
+    delete updateData.created_at;
+    delete updateData.updated_at;
+    const { error } = await supabase.from("contact_info").update(updateData as any).eq("id", contact.id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else { toast({ title: "Saved!" }); qc.invalidateQueries({ queryKey: ["contact_info"] }); }
   };
