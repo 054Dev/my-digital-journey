@@ -1,58 +1,11 @@
 import PageHero from "@/components/PageHero";
 import AnimatedSection from "@/components/AnimatedSection";
 import skillsImage from "@/assets/skills-workspace.jpg";
-import { Code, Camera, Music, Paintbrush, Globe, Terminal } from "lucide-react";
+import { Code, Terminal, Github, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
-
-const technicalSkills = [
-  { name: "JavaScript / TypeScript", level: 90 },
-  { name: "React & Next.js", level: 85 },
-  { name: "Python", level: 80 },
-  { name: "Node.js & Express", level: 75 },
-  { name: "SQL & Database Design", level: 70 },
-  { name: "Git & DevOps", level: 72 },
-];
-
-const creativeSkills = [
-  {
-    icon: Camera,
-    title: "Photography",
-    description: "Landscape and street photography. My work has been featured in the university magazine and local exhibitions.",
-  },
-  {
-    icon: Music,
-    title: "Guitar & Music",
-    description: "Self-taught guitarist for 6 years. I play acoustic, perform at open mics, and compose my own pieces.",
-  },
-  {
-    icon: Paintbrush,
-    title: "Digital Art",
-    description: "Creating illustrations and UI mockups using Figma, Procreate, and Adobe Creative Suite.",
-  },
-  {
-    icon: Globe,
-    title: "Languages",
-    description: "Fluent in English and Spanish. Currently learning Japanese through self-study and conversation groups.",
-  },
-];
-
-const projects = [
-  {
-    title: "EcoTrack App",
-    tech: "React Native • Node.js • MongoDB",
-    description: "A mobile app helping users track their carbon footprint with personalized sustainability tips.",
-  },
-  {
-    title: "StudyBuddy Platform",
-    tech: "Next.js • PostgreSQL • WebRTC",
-    description: "Real-time collaborative study platform connecting students for virtual study sessions.",
-  },
-  {
-    title: "AI Poetry Generator",
-    tech: "Python • TensorFlow • Flask",
-    description: "An NLP project that generates poetry in the style of famous poets using fine-tuned language models.",
-  },
-];
+import { useSkillsTechnical, useSkillsCreative, useProjects, useSiteImages } from "@/hooks/usePortfolioData";
+import { getIcon } from "@/lib/iconMap";
+import { PageSkeleton } from "@/components/LoadingSkeleton";
 
 const SkillBar = ({ name, level }: { name: string; level: number }) => (
   <div className="mb-6">
@@ -61,72 +14,62 @@ const SkillBar = ({ name, level }: { name: string; level: number }) => (
       <span className="font-body text-sm text-muted-foreground">{level}%</span>
     </div>
     <div className="h-2 bg-muted rounded-full overflow-hidden">
-      <motion.div
-        className="h-full bg-primary rounded-full"
-        initial={{ width: 0 }}
-        whileInView={{ width: `${level}%` }}
-        viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-      />
+      <motion.div className="h-full bg-primary rounded-full" initial={{ width: 0 }} whileInView={{ width: `${level}%` }} viewport={{ once: true }} transition={{ duration: 1, delay: 0.2, ease: "easeOut" }} />
     </div>
   </div>
 );
 
 const Skills = () => {
+  const { data: techSkills, isLoading } = useSkillsTechnical();
+  const { data: creativeSkills } = useSkillsCreative();
+  const { data: projects } = useProjects();
+  const { data: images } = useSiteImages();
+
+  if (isLoading) return <PageSkeleton />;
+
+  const heroImg = images?.find(i => i.image_key === "hero-skills");
+
   return (
     <>
-      <PageHero
-        image={skillsImage}
-        title="Skills & Talents"
-        subtitle="From coding to creating — the diverse skills that define my toolkit."
-        alt="Creative workspace with camera, guitar, and laptop with code"
-      />
+      <PageHero image={heroImg?.url || skillsImage} title="Skills & Talents" subtitle="From coding to creating — the diverse skills that define my toolkit." alt="Creative workspace" />
 
-      {/* Technical Skills */}
       <section className="page-section">
         <div className="grid md:grid-cols-2 gap-16 items-start">
           <AnimatedSection>
             <div className="flex items-center gap-3 mb-6">
               <Terminal className="text-primary" size={24} />
-              <p className="font-body text-primary uppercase tracking-[0.2em] text-sm">
-                Technical
-              </p>
+              <p className="font-body text-primary uppercase tracking-[0.2em] text-sm">Technical</p>
             </div>
             <h2 className="section-title">Hard Skills</h2>
-            <p className="body-text mb-8">
-              My technical foundation is built on web development, with growing expertise
-              in machine learning and cloud computing.
-            </p>
-            {technicalSkills.map((skill) => (
-              <SkillBar key={skill.name} name={skill.name} level={skill.level} />
-            ))}
+            <p className="body-text mb-8">My technical foundation is built on web development, with growing expertise in machine learning and cloud computing.</p>
+            {techSkills?.map((skill) => <SkillBar key={skill.id} name={skill.name} level={skill.level} />)}
           </AnimatedSection>
 
           <AnimatedSection delay={0.2}>
             <div className="flex items-center gap-3 mb-6">
               <Code className="text-primary" size={24} />
-              <p className="font-body text-primary uppercase tracking-[0.2em] text-sm">
-                Projects
-              </p>
+              <p className="font-body text-primary uppercase tracking-[0.2em] text-sm">Projects</p>
             </div>
             <h2 className="section-title">Featured Work</h2>
             <div className="space-y-6">
-              {projects.map((project, index) => (
-                <motion.div
-                  key={project.title}
-                  className="skill-card"
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.15, duration: 0.5 }}
-                >
-                  <h3 className="font-display text-xl font-semibold text-foreground mb-1">
-                    {project.title}
-                  </h3>
-                  <p className="text-sm text-primary font-body font-medium mb-3">
-                    {project.tech}
-                  </p>
+              {projects?.map((project, index) => (
+                <motion.div key={project.id} className="skill-card" initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.15, duration: 0.5 }}>
+                  {project.image_url && <img src={project.image_url} alt={project.title} className="w-full h-32 object-cover rounded-md mb-3" loading="lazy" />}
+                  <h3 className="font-display text-xl font-semibold text-foreground mb-1">{project.title}</h3>
+                  <p className="text-sm text-primary font-body font-medium mb-3">{project.tech_stack}</p>
                   <p className="text-muted-foreground font-body">{project.description}</p>
+                  <div className="flex gap-3 mt-3">
+                    {project.live_demo_link && (
+                      <a href={project.live_demo_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-primary hover:underline">
+                        <ExternalLink size={14} /> Live Demo
+                      </a>
+                    )}
+                    {project.github_link && (
+                      <a href={project.github_link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+                        <Github size={14} /> Source Code
+                      </a>
+                    )}
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -134,32 +77,27 @@ const Skills = () => {
         </div>
       </section>
 
-      {/* Creative Skills */}
       <section className="bg-card border-y border-border">
         <div className="page-section">
           <AnimatedSection>
-            <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3 text-center">
-              Beyond Code
-            </p>
+            <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3 text-center">Beyond Code</p>
             <h2 className="section-title text-center">Creative Pursuits</h2>
           </AnimatedSection>
-
           <div className="grid sm:grid-cols-2 gap-6 mt-12">
-            {creativeSkills.map((skill, index) => (
-              <AnimatedSection key={skill.title} delay={index * 0.1}>
-                <div className="skill-card h-full flex gap-5">
-                  <div className="bg-accent rounded-xl p-4 h-fit shrink-0">
-                    <skill.icon className="text-primary" size={24} />
+            {creativeSkills?.map((skill, index) => {
+              const Icon = getIcon(skill.icon_name);
+              return (
+                <AnimatedSection key={skill.id} delay={index * 0.1}>
+                  <div className="skill-card h-full flex gap-5">
+                    <div className="bg-accent rounded-xl p-4 h-fit shrink-0"><Icon className="text-primary" size={24} /></div>
+                    <div>
+                      <h3 className="font-display text-xl font-semibold text-foreground mb-2">{skill.title}</h3>
+                      <p className="body-text text-base">{skill.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-display text-xl font-semibold text-foreground mb-2">
-                      {skill.title}
-                    </h3>
-                    <p className="body-text text-base">{skill.description}</p>
-                  </div>
-                </div>
-              </AnimatedSection>
-            ))}
+                </AnimatedSection>
+              );
+            })}
           </div>
         </div>
       </section>
