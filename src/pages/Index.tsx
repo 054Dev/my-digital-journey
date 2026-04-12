@@ -105,12 +105,26 @@ const Index = () => {
         </div>
       </section>
 
-      <section className="page-section text-center">
+      <section
+        className="page-section text-center relative"
+        style={{
+          backgroundImage: images?.find(i => i.image_key === "bg-quote-home")?.url
+            ? `url(${images.find(i => i.image_key === "bg-quote-home")?.url})`
+            : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {images?.find(i => i.image_key === "bg-quote-home")?.url && (
+          <div className="absolute inset-0 bg-background/80" />
+        )}
         <AnimatedSection>
-          <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
-            "{s?.quote_text || "The only way to do great work is to love what you do."}"
-          </blockquote>
-          <p className="mt-6 text-muted-foreground font-body">— {s?.quote_author || "Steve Jobs"}</p>
+          <div className="relative z-10">
+            <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
+              "{s?.quote_text || "The only way to do great work is to love what you do."}"
+            </blockquote>
+            <p className="mt-6 text-muted-foreground font-body">— {s?.quote_author || "Steve Jobs"}</p>
+          </div>
         </AnimatedSection>
       </section>
     </>

@@ -69,12 +69,26 @@ const Aspirations = () => {
         </div>
       </section>
 
-      <section className="page-section text-center">
+      <section
+        className="page-section text-center relative"
+        style={{
+          backgroundImage: images?.find(i => i.image_key === "bg-quote-aspirations")?.url
+            ? `url(${images.find(i => i.image_key === "bg-quote-aspirations")?.url})`
+            : undefined,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {images?.find(i => i.image_key === "bg-quote-aspirations")?.url && (
+          <div className="absolute inset-0 bg-background/80" />
+        )}
         <AnimatedSection>
-          <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
-            "{settings?.aspirations_quote || "The best time to plant a tree was 20 years ago. The second best time is now."}"
-          </blockquote>
-          <p className="mt-6 text-muted-foreground font-body">— {settings?.aspirations_quote_author || "Chinese Proverb"}</p>
+          <div className="relative z-10">
+            <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
+              "{settings?.aspirations_quote || "The best time to plant a tree was 20 years ago. The second best time is now."}"
+            </blockquote>
+            <p className="mt-6 text-muted-foreground font-body">— {settings?.aspirations_quote_author || "Chinese Proverb"}</p>
+          </div>
         </AnimatedSection>
       </section>
     </>
