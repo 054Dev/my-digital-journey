@@ -7,6 +7,7 @@ import { z } from "zod";
 import { useSocialLinks, useContactInfo, useSiteSettings } from "@/hooks/usePortfolioData";
 import { getIcon } from "@/lib/iconMap";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { supabase } from "@/integrations/supabase/client";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -23,29 +24,56 @@ const Contact = () => {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   if (isLoading) return <PageSkeleton />;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = contactSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach(err => { if (err.path[0]) fieldErrors[err.path[0] as string] = err.message; });
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      });
       setErrors(fieldErrors);
       return;
     }
-    setSubmitted(true);
-    toast({ title: "Message sent!", description: "Thank you for reaching out." });
+
+    setSubmitting(true);
+    try {
+      // Send to edge function for email + WhatsApp delivery
+      const { error } = await supabase.functions.invoke("send-contact-message", {
+        body: result.data,
+      });
+
+      if (error) {
+        console.error("Contact form error:", error);
+        toast({ title: "Error sending message", description: "Please try again later.", variant: "destructive" });
+      } else {
+        setSubmitted(true);
+        toast({ title: "Message sent!", description: "Thank you for reaching out." });
+      }
+    } catch (err) {
+      console.error("Contact submit error:", err);
+      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const statusColor = contact?.availability_status === "available" ? "bg-sage" : contact?.availability_status === "busy" ? "bg-amber" : "bg-destructive";
+  const statusColor =
+    contact?.availability_status === "available"
+      ? "bg-sage"
+      : contact?.availability_status === "busy"
+        ? "bg-amber"
+        : "bg-destructive";
 
   return (
     <>
@@ -54,7 +82,9 @@ const Contact = () => {
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-3xl">
             <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3">Let's Connect</p>
             <h1 className="font-display text-4xl md:text-6xl font-bold text-secondary-foreground leading-tight mb-6">Get in Touch</h1>
-            <p className="text-xl text-secondary-foreground/80 font-body">Whether it's a project idea, collaboration opportunity, or just a friendly hello — I'd love to hear from you.</p>
+            <p className="text-xl text-secondary-foreground/80 font-body">
+              Whether it's a project idea, collaboration opportunity, or just a friendly hello — I'd love to hear from you.
+            </p>
           </motion.div>
         </div>
       </section>
@@ -68,8 +98,16 @@ const Contact = () => {
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-accent rounded-2xl p-12 text-center">
                   <CheckCircle className="text-primary mx-auto mb-4" size={48} />
                   <h3 className="font-display text-2xl font-semibold text-foreground mb-2">Thank You!</h3>
-                  <p className="body-text">Your message has been received.</p>
-                  <button onClick={() => { setSubmitted(false); setFormData({ name: "", email: "", subject: "", message: "" }); }} className="mt-6 text-primary font-body font-medium hover:underline">Send another message</button>
+                  <p className="body-text">Your message has been received and delivered.</p>
+                  <button
+                    onClick={() => {
+                      setSubmitted(false);
+                      setFormData({ name: "", email: "", subject: "", message: "" });
+                    }}
+                    className="mt-6 text-primary font-body font-medium hover:underline"
+                  >
+                    Send another message
+                  </button>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6" noValidate>
@@ -95,8 +133,12 @@ const Contact = () => {
                     <textarea id="message" name="message" rows={6} value={formData.message} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all resize-none" placeholder="Your message..." />
                     {errors.message && <p className="text-destructive text-sm mt-1">{errors.message}</p>}
                   </div>
-                  <button type="submit" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-body font-semibold text-lg hover:bg-primary/90 transition-colors">
-                    <Send size={18} /> Send Message
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-body font-semibold text-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  >
+                    <Send size={18} /> {submitting ? "Sending..." : "Send Message"}
                   </button>
                 </form>
               )}
@@ -138,7 +180,7 @@ const Contact = () => {
 
               <h3 className="font-display text-xl font-semibold text-foreground mb-4">Find Me Online</h3>
               <div className="space-y-4">
-                {socialLinks?.map(social => {
+                {socialLinks?.map((social) => {
                   const Icon = getIcon(social.icon_name);
                   return (
                     <a key={social.id} href={social.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
