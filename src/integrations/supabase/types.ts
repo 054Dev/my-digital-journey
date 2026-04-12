@@ -116,6 +116,36 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
+          subject?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
       education_achievements: {
         Row: {
           count_value: string
@@ -203,6 +233,30 @@ export type Database = {
           institution?: string
           period?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      image_versions: {
+        Row: {
+          created_at: string
+          id: string
+          image_key: string
+          is_active: boolean
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_key: string
+          is_active?: boolean
+          url?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_key?: string
+          is_active?: boolean
+          url?: string
         }
         Relationships: []
       }
@@ -488,6 +542,51 @@ export type Database = {
           platform?: string
           updated_at?: string
           url?: string
+        }
+        Relationships: []
+      }
+      theme_settings: {
+        Row: {
+          accent_color: string
+          background_color: string
+          created_at: string
+          font_body: string
+          font_display: string
+          foreground_color: string
+          heading_color: string
+          id: string
+          primary_color: string
+          secondary_color: string
+          text_color: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          font_body?: string
+          font_display?: string
+          foreground_color?: string
+          heading_color?: string
+          id?: string
+          primary_color?: string
+          secondary_color?: string
+          text_color?: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          background_color?: string
+          created_at?: string
+          font_body?: string
+          font_display?: string
+          foreground_color?: string
+          heading_color?: string
+          id?: string
+          primary_color?: string
+          secondary_color?: string
+          text_color?: string
+          updated_at?: string
         }
         Relationships: []
       }
