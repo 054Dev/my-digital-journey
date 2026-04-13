@@ -1,27 +1,36 @@
 import PageHero from "@/components/PageHero";
 import AnimatedSection from "@/components/AnimatedSection";
-import childhoodImage from "@/assets/childhood-memory.jpg";
 import { useChildhoodEvents, useSiteSettings, useSiteImages } from "@/hooks/usePortfolioData";
 import { getIcon } from "@/lib/iconMap";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const Childhood = () => {
   const { data: events, isLoading: loadingEvents } = useChildhoodEvents();
-  const { data: settings } = useSiteSettings();
+  const { data: settings, isLoading: loadingSettings } = useSiteSettings();
   const { data: images } = useSiteImages();
 
-  if (loadingEvents) return <PageSkeleton />;
+  usePageSEO({
+    title: "Childhood",
+    description: settings?.full_name
+      ? `Discover the childhood and formative years of ${settings.full_name}.`
+      : "Childhood memories and formative experiences.",
+  });
+
+  if (loadingEvents || loadingSettings) return <PageSkeleton />;
 
   const heroImg = images?.find(i => i.image_key === "hero-childhood");
 
   return (
     <>
-      <PageHero
-        image={heroImg?.url || childhoodImage}
-        title="My Childhood"
-        subtitle="The formative years that shaped who I am — from backyard adventures to discovering my first passion."
-        alt={heroImg?.alt_text || "Nostalgic childhood backyard scene"}
-      />
+      {heroImg?.url && (
+        <PageHero
+          image={heroImg.url}
+          title="My Childhood"
+          subtitle="The formative years that shaped who I am."
+          alt={heroImg.alt_text || "Childhood memories"}
+        />
+      )}
 
       <section className="page-section">
         <AnimatedSection>
@@ -60,18 +69,24 @@ const Childhood = () => {
               <h2 className="section-title">Family & Values</h2>
               <p className="body-text mb-8">{settings?.family_text || ""}</p>
               <div className="grid grid-cols-3 gap-8 mt-12">
-                <div>
-                  <p className="font-display text-3xl font-bold text-primary">{settings?.value_1 || "Curiosity"}</p>
-                  <p className="text-sm text-muted-foreground mt-2">{settings?.value_1_sub || ""}</p>
-                </div>
-                <div>
-                  <p className="font-display text-3xl font-bold text-primary">{settings?.value_2 || "Resilience"}</p>
-                  <p className="text-sm text-muted-foreground mt-2">{settings?.value_2_sub || ""}</p>
-                </div>
-                <div>
-                  <p className="font-display text-3xl font-bold text-primary">{settings?.value_3 || "Kindness"}</p>
-                  <p className="text-sm text-muted-foreground mt-2">{settings?.value_3_sub || ""}</p>
-                </div>
+                {settings?.value_1 && (
+                  <div>
+                    <p className="font-display text-3xl font-bold text-primary">{settings.value_1}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{settings.value_1_sub || ""}</p>
+                  </div>
+                )}
+                {settings?.value_2 && (
+                  <div>
+                    <p className="font-display text-3xl font-bold text-primary">{settings.value_2}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{settings.value_2_sub || ""}</p>
+                  </div>
+                )}
+                {settings?.value_3 && (
+                  <div>
+                    <p className="font-display text-3xl font-bold text-primary">{settings.value_3}</p>
+                    <p className="text-sm text-muted-foreground mt-2">{settings.value_3_sub || ""}</p>
+                  </div>
+                )}
               </div>
             </div>
           </AnimatedSection>

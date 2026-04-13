@@ -1,42 +1,52 @@
 import PageHero from "@/components/PageHero";
 import AnimatedSection from "@/components/AnimatedSection";
-import aspirationsImage from "@/assets/aspirations-horizon.jpg";
 import { motion } from "framer-motion";
 import { useAspirations, useSiteSettings, useSiteImages } from "@/hooks/usePortfolioData";
 import { getIcon } from "@/lib/iconMap";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const statusColors: Record<string, string> = {
   "In Progress": "bg-primary/15 text-primary",
   "Planning": "bg-accent text-accent-foreground",
-  "Dream": "bg-amber-soft text-foreground",
+  "Dream": "bg-muted text-foreground",
   "Future": "bg-muted text-muted-foreground",
-  "Active": "bg-sage-soft text-foreground",
+  "Active": "bg-muted text-foreground",
   "Ongoing": "bg-muted text-muted-foreground",
 };
 
 const Aspirations = () => {
   const { data: goals, isLoading } = useAspirations();
-  const { data: settings } = useSiteSettings();
+  const { data: settings, isLoading: loadingSettings } = useSiteSettings();
   const { data: images } = useSiteImages();
 
-  if (isLoading) return <PageSkeleton />;
+  usePageSEO({
+    title: "Aspirations",
+    description: settings?.full_name
+      ? `Future goals, dreams and aspirations of ${settings.full_name}.`
+      : "Future aspirations and career goals.",
+  });
+
+  if (isLoading || loadingSettings) return <PageSkeleton />;
 
   const heroImg = images?.find(i => i.image_key === "hero-aspirations");
 
   return (
     <>
-      <PageHero image={heroImg?.url || aspirationsImage} title="Future Aspirations" subtitle="Where I'm headed — the dreams, goals, and ambitions that fuel my journey forward." alt="Sunrise horizon" />
+      {heroImg?.url && (
+        <PageHero image={heroImg.url} title="Future Aspirations" subtitle="Where I'm headed — the dreams, goals, and ambitions that fuel my journey forward." alt="Sunrise horizon" />
+      )}
 
       <section className="page-section">
         <AnimatedSection>
           <div className="max-w-3xl mx-auto text-center">
             <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3">My Vision</p>
-            <h2 className="font-display text-3xl md:text-5xl font-semibold text-foreground leading-tight mb-8">
-              {settings?.vision_title ? (
-                <>{settings.vision_title.split(",")[0]},{" "}<span className="text-primary">{settings.vision_title.split(",").slice(1).join(",")}</span></>
-              ) : "Technology should empower everyone, not just the privileged few."}
-            </h2>
+            {settings?.vision_title && (
+              <h2 className="font-display text-3xl md:text-5xl font-semibold text-foreground leading-tight mb-8">
+                {settings.vision_title.split(",")[0]},{" "}
+                <span className="text-primary">{settings.vision_title.split(",").slice(1).join(",")}</span>
+              </h2>
+            )}
             <p className="body-text">{settings?.vision_text || ""}</p>
           </div>
         </AnimatedSection>
@@ -69,28 +79,32 @@ const Aspirations = () => {
         </div>
       </section>
 
-      <section
-        className="page-section text-center relative"
-        style={{
-          backgroundImage: images?.find(i => i.image_key === "bg-quote-aspirations")?.url
-            ? `url(${images.find(i => i.image_key === "bg-quote-aspirations")?.url})`
-            : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {images?.find(i => i.image_key === "bg-quote-aspirations")?.url && (
-          <div className="absolute inset-0 bg-background/80" />
-        )}
-        <AnimatedSection>
-          <div className="relative z-10">
-            <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
-              "{settings?.aspirations_quote || "The best time to plant a tree was 20 years ago. The second best time is now."}"
-            </blockquote>
-            <p className="mt-6 text-muted-foreground font-body">— {settings?.aspirations_quote_author || "Chinese Proverb"}</p>
-          </div>
-        </AnimatedSection>
-      </section>
+      {settings?.aspirations_quote && (
+        <section
+          className="page-section text-center relative"
+          style={{
+            backgroundImage: images?.find(i => i.image_key === "bg-quote-aspirations")?.url
+              ? `url(${images.find(i => i.image_key === "bg-quote-aspirations")?.url})`
+              : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          {images?.find(i => i.image_key === "bg-quote-aspirations")?.url && (
+            <div className="absolute inset-0 bg-background/80" />
+          )}
+          <AnimatedSection>
+            <div className="relative z-10">
+              <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
+                "{settings.aspirations_quote}"
+              </blockquote>
+              {settings.aspirations_quote_author && (
+                <p className="mt-6 text-muted-foreground font-body">— {settings.aspirations_quote_author}</p>
+              )}
+            </div>
+          </AnimatedSection>
+        </section>
+      )}
     </>
   );
 };
