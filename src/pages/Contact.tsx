@@ -8,6 +8,7 @@ import { useSocialLinks, useContactInfo, useSiteSettings } from "@/hooks/usePort
 import { getIcon } from "@/lib/iconMap";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const contactSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -25,6 +26,13 @@ const Contact = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  usePageSEO({
+    title: "Contact",
+    description: settings?.full_name
+      ? `Get in touch with ${settings.full_name}. Send a message or connect via social media.`
+      : "Contact page — send a message or connect online.",
+  });
 
   if (isLoading) return <PageSkeleton />;
 
@@ -48,7 +56,6 @@ const Contact = () => {
 
     setSubmitting(true);
     try {
-      // Send to edge function for email + WhatsApp delivery
       const { error } = await supabase.functions.invoke("send-contact-message", {
         body: result.data,
       });
@@ -70,10 +77,10 @@ const Contact = () => {
 
   const statusColor =
     contact?.availability_status === "available"
-      ? "bg-sage"
+      ? "bg-primary/60"
       : contact?.availability_status === "busy"
-        ? "bg-amber"
-        : "bg-destructive";
+        ? "bg-destructive/60"
+        : "bg-muted-foreground/60";
 
   return (
     <>
@@ -194,15 +201,17 @@ const Contact = () => {
                 })}
               </div>
 
-              <div className="mt-10 bg-accent rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${statusColor}`} />
-                  <span className="font-body text-sm font-medium text-foreground">
-                    {contact?.availability_status === "available" ? "Available for opportunities" : contact?.availability_status === "busy" ? "Currently busy" : "Not available"}
-                  </span>
+              {contact?.availability_status && (
+                <div className="mt-10 bg-accent rounded-2xl p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${statusColor}`} />
+                    <span className="font-body text-sm font-medium text-foreground">
+                      {contact.availability_status === "available" ? "Available for opportunities" : contact.availability_status === "busy" ? "Currently busy" : "Not available"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{contact.availability_text || ""}</p>
                 </div>
-                <p className="text-sm text-muted-foreground">{contact?.availability_text || ""}</p>
-              </div>
+              )}
             </AnimatedSection>
           </div>
         </div>

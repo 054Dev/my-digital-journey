@@ -1,15 +1,24 @@
 import { useState } from "react";
 import AnimatedSection from "@/components/AnimatedSection";
-import { useResumeFiles } from "@/hooks/usePortfolioData";
+import { useResumeFiles, useSiteSettings } from "@/hooks/usePortfolioData";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
-import { FileText, Download, Eye, X } from "lucide-react";
+import { FileText, Download, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const Resume = () => {
   const { data: files, isLoading } = useResumeFiles();
+  const { data: settings } = useSiteSettings();
   const [previewFile, setPreviewFile] = useState<{ url: string; name: string } | null>(null);
+
+  usePageSEO({
+    title: "Resume & CV",
+    description: settings?.full_name
+      ? `Download the resume and CV of ${settings.full_name}.`
+      : "Resume and CV documents.",
+  });
 
   if (isLoading) return <PageSkeleton />;
 
@@ -81,13 +90,10 @@ const Resume = () => {
         )}
       </section>
 
-      {/* Read-only Preview Modal */}
       <Dialog open={!!previewFile} onOpenChange={() => setPreviewFile(null)}>
         <DialogContent className="max-w-4xl w-[95vw] h-[90vh] flex flex-col p-0">
           <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0">
-            <DialogTitle className="flex items-center justify-between">
-              <span>{previewFile?.name} Preview</span>
-            </DialogTitle>
+            <DialogTitle>{previewFile?.name} Preview</DialogTitle>
           </DialogHeader>
           <div
             className="flex-1 overflow-hidden px-6 pb-6"

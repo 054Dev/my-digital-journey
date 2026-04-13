@@ -1,11 +1,11 @@
 import PageHero from "@/components/PageHero";
 import AnimatedSection from "@/components/AnimatedSection";
-import skillsImage from "@/assets/skills-workspace.jpg";
 import { Code, Terminal, Github, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
-import { useSkillsTechnical, useSkillsCreative, useProjects, useSiteImages } from "@/hooks/usePortfolioData";
+import { useSkillsTechnical, useSkillsCreative, useProjects, useSiteImages, useSiteSettings } from "@/hooks/usePortfolioData";
 import { getIcon } from "@/lib/iconMap";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const SkillBar = ({ name, level }: { name: string; level: number }) => (
   <div className="mb-6">
@@ -24,6 +24,14 @@ const Skills = () => {
   const { data: creativeSkills } = useSkillsCreative();
   const { data: projects } = useProjects();
   const { data: images } = useSiteImages();
+  const { data: settings } = useSiteSettings();
+
+  usePageSEO({
+    title: "Skills & Projects",
+    description: settings?.full_name
+      ? `Technical skills, projects and creative pursuits of ${settings.full_name}.`
+      : "Skills, projects and creative work.",
+  });
 
   if (isLoading) return <PageSkeleton />;
 
@@ -31,7 +39,9 @@ const Skills = () => {
 
   return (
     <>
-      <PageHero image={heroImg?.url || skillsImage} title="Skills & Talents" subtitle="From coding to creating — the diverse skills that define my toolkit." alt="Creative workspace" />
+      {heroImg?.url && (
+        <PageHero image={heroImg.url} title="Skills & Talents" subtitle="From coding to creating — the diverse skills that define my toolkit." alt="Creative workspace" />
+      )}
 
       <section className="page-section">
         <div className="grid md:grid-cols-2 gap-16 items-start">
@@ -41,7 +51,6 @@ const Skills = () => {
               <p className="font-body text-primary uppercase tracking-[0.2em] text-sm">Technical</p>
             </div>
             <h2 className="section-title">Hard Skills</h2>
-            <p className="body-text mb-8">My technical foundation is built on web development, with growing expertise in machine learning and cloud computing.</p>
             {techSkills?.map((skill) => <SkillBar key={skill.id} name={skill.name} level={skill.level} />)}
           </AnimatedSection>
 
@@ -77,30 +86,32 @@ const Skills = () => {
         </div>
       </section>
 
-      <section className="bg-card border-y border-border">
-        <div className="page-section">
-          <AnimatedSection>
-            <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3 text-center">Beyond Code</p>
-            <h2 className="section-title text-center">Creative Pursuits</h2>
-          </AnimatedSection>
-          <div className="grid sm:grid-cols-2 gap-6 mt-12">
-            {creativeSkills?.map((skill, index) => {
-              const Icon = getIcon(skill.icon_name);
-              return (
-                <AnimatedSection key={skill.id} delay={index * 0.1}>
-                  <div className="skill-card h-full flex gap-5">
-                    <div className="bg-accent rounded-xl p-4 h-fit shrink-0"><Icon className="text-primary" size={24} /></div>
-                    <div>
-                      <h3 className="font-display text-xl font-semibold text-foreground mb-2">{skill.title}</h3>
-                      <p className="body-text text-base">{skill.description}</p>
+      {creativeSkills && creativeSkills.length > 0 && (
+        <section className="bg-card border-y border-border">
+          <div className="page-section">
+            <AnimatedSection>
+              <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3 text-center">Beyond Code</p>
+              <h2 className="section-title text-center">Creative Pursuits</h2>
+            </AnimatedSection>
+            <div className="grid sm:grid-cols-2 gap-6 mt-12">
+              {creativeSkills.map((skill, index) => {
+                const Icon = getIcon(skill.icon_name);
+                return (
+                  <AnimatedSection key={skill.id} delay={index * 0.1}>
+                    <div className="skill-card h-full flex gap-5">
+                      <div className="bg-accent rounded-xl p-4 h-fit shrink-0"><Icon className="text-primary" size={24} /></div>
+                      <div>
+                        <h3 className="font-display text-xl font-semibold text-foreground mb-2">{skill.title}</h3>
+                        <p className="body-text text-base">{skill.description}</p>
+                      </div>
                     </div>
-                  </div>
-                </AnimatedSection>
-              );
-            })}
+                  </AnimatedSection>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </>
   );
 };

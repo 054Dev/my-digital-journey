@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Download } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSiteSettings, useResumeFiles } from "@/hooks/usePortfolioData";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const navItems = [
   { path: "/", label: "Home" },
@@ -21,16 +22,15 @@ interface LayoutProps {
 const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: settings } = useSiteSettings();
+  const { data: settings, isLoading: loadingSettings } = useSiteSettings();
   const { data: resumeFiles } = useResumeFiles();
 
-  const name = settings?.full_name || "Alex Rivera";
-  const tagline = settings?.tagline || "Computer Science Student • Dreamer • Creator";
+  const name = settings?.full_name || "";
+  const tagline = settings?.tagline || "";
   const resumeFile = resumeFiles?.find(f => f.file_type === "resume");
   const cvFile = resumeFiles?.find(f => f.file_type === "cv");
   const downloadFile = resumeFile || cvFile;
 
-  // Don't show layout on setup page
   if (location.pathname === "/setup") return <>{children}</>;
 
   return (
@@ -38,7 +38,7 @@ const Layout = ({ children }: LayoutProps) => {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
         <nav className="max-w-5xl mx-auto px-6 flex items-center justify-between h-16">
           <Link to="/" className="font-display text-xl font-semibold text-foreground tracking-tight">
-            {name}
+            {loadingSettings ? <Skeleton className="h-6 w-32" /> : name}
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
@@ -89,8 +89,17 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="max-w-5xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-center md:text-left">
-              <p className="font-display text-lg font-semibold text-foreground">{name}</p>
-              <p className="text-sm text-muted-foreground mt-1">{tagline}</p>
+              {loadingSettings ? (
+                <>
+                  <Skeleton className="h-5 w-40 mb-2" />
+                  <Skeleton className="h-4 w-56" />
+                </>
+              ) : (
+                <>
+                  <p className="font-display text-lg font-semibold text-foreground">{name}</p>
+                  <p className="text-sm text-muted-foreground mt-1">{tagline}</p>
+                </>
+              )}
             </div>
             <div className="flex gap-6 flex-wrap justify-center">
               {navItems.map((item) => (

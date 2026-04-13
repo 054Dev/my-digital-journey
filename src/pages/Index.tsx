@@ -1,11 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, Palette, Rocket, Mail } from "lucide-react";
-import heroImage from "@/assets/hero-campus.jpg";
 import AnimatedSection from "@/components/AnimatedSection";
 import { useSiteSettings, useSiteImages } from "@/hooks/usePortfolioData";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
-import { Suspense, lazy } from "react";
+import { usePageSEO } from "@/hooks/usePageSEO";
 
 const journeyLinks = [
   { to: "/childhood", icon: BookOpen, title: "Childhood", description: "Where it all began — family, adventures, and formative moments." },
@@ -19,6 +18,11 @@ const Index = () => {
   const { data: settings, isLoading } = useSiteSettings();
   const { data: images } = useSiteImages();
 
+  usePageSEO({
+    title: settings?.full_name ? `${settings.full_name} — Personal Portfolio` : undefined,
+    description: settings?.bio_short || "Personal portfolio showcasing life journey, skills, and aspirations.",
+  });
+
   if (isLoading) return <PageSkeleton />;
 
   const heroImg = images?.find(i => i.image_key === "hero-home");
@@ -27,21 +31,26 @@ const Index = () => {
   return (
     <>
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        <img
-          src={heroImg?.url || heroImage}
-          alt="Hero"
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="eager"
-        />
+        {heroImg?.url && (
+          <img
+            src={heroImg.url}
+            alt={`${s?.full_name || "Portfolio"} hero`}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/85 via-foreground/60 to-foreground/30" />
         <div className="relative z-10 max-w-5xl mx-auto px-6 py-32">
           <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, delay: 0.3 }}>
             <p className="font-body text-primary uppercase tracking-[0.3em] text-sm mb-4">Welcome to my journey</p>
             <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-primary-foreground leading-[1.1] mb-6">
-              Hi, I'm{" "}<span className="text-primary">{s?.first_name || "Alex"}</span><br />{s?.full_name?.split(" ").slice(1).join(" ") || "Rivera"}
+              {s?.first_name && (
+                <>Hi, I'm{" "}<span className="text-primary">{s.first_name}</span><br /></>
+              )}
+              {s?.full_name?.split(" ").slice(1).join(" ")}
             </h1>
             <p className="font-body text-xl md:text-2xl text-primary-foreground/80 max-w-xl leading-relaxed mb-10">
-              {s?.bio_short || "A passionate student building the future."}
+              {s?.bio_short || ""}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/childhood" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-body font-semibold text-lg hover:bg-primary/90 transition-colors">
@@ -60,24 +69,30 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3">About Me</p>
-              <h2 className="section-title">{s?.about_heading || "A story of curiosity, growth & ambition"}</h2>
+              <h2 className="section-title">{s?.about_heading || ""}</h2>
               <p className="body-text mb-6">{s?.about_text_1 || ""}</p>
               <p className="body-text">{s?.about_text_2 || ""}</p>
             </div>
             <div className="bg-accent rounded-2xl p-8 md:p-12">
               <div className="space-y-6">
-                <div>
-                  <p className="font-display text-4xl font-bold text-primary">{s?.stat_1_value || "21"}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{s?.stat_1_label || "Years of adventures"}</p>
-                </div>
-                <div className="border-t border-border pt-6">
-                  <p className="font-display text-4xl font-bold text-primary">{s?.stat_2_value || "3.8"}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{s?.stat_2_label || "Current GPA"}</p>
-                </div>
-                <div className="border-t border-border pt-6">
-                  <p className="font-display text-4xl font-bold text-primary">{s?.stat_3_value || "12+"}</p>
-                  <p className="text-sm text-muted-foreground mt-1">{s?.stat_3_label || "Projects completed"}</p>
-                </div>
+                {s?.stat_1_value && (
+                  <div>
+                    <p className="font-display text-4xl font-bold text-primary">{s.stat_1_value}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{s.stat_1_label}</p>
+                  </div>
+                )}
+                {s?.stat_2_value && (
+                  <div className="border-t border-border pt-6">
+                    <p className="font-display text-4xl font-bold text-primary">{s.stat_2_value}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{s.stat_2_label}</p>
+                  </div>
+                )}
+                {s?.stat_3_value && (
+                  <div className="border-t border-border pt-6">
+                    <p className="font-display text-4xl font-bold text-primary">{s.stat_3_value}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{s.stat_3_label}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -105,28 +120,30 @@ const Index = () => {
         </div>
       </section>
 
-      <section
-        className="page-section text-center relative"
-        style={{
-          backgroundImage: images?.find(i => i.image_key === "bg-quote-home")?.url
-            ? `url(${images.find(i => i.image_key === "bg-quote-home")?.url})`
-            : undefined,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {images?.find(i => i.image_key === "bg-quote-home")?.url && (
-          <div className="absolute inset-0 bg-background/80" />
-        )}
-        <AnimatedSection>
-          <div className="relative z-10">
-            <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
-              "{s?.quote_text || "The only way to do great work is to love what you do."}"
-            </blockquote>
-            <p className="mt-6 text-muted-foreground font-body">— {s?.quote_author || "Steve Jobs"}</p>
-          </div>
-        </AnimatedSection>
-      </section>
+      {s?.quote_text && (
+        <section
+          className="page-section text-center relative"
+          style={{
+            backgroundImage: images?.find(i => i.image_key === "bg-quote-home")?.url
+              ? `url(${images.find(i => i.image_key === "bg-quote-home")?.url})`
+              : undefined,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          {images?.find(i => i.image_key === "bg-quote-home")?.url && (
+            <div className="absolute inset-0 bg-background/80" />
+          )}
+          <AnimatedSection>
+            <div className="relative z-10">
+              <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
+                "{s.quote_text}"
+              </blockquote>
+              {s.quote_author && <p className="mt-6 text-muted-foreground font-body">— {s.quote_author}</p>}
+            </div>
+          </AnimatedSection>
+        </section>
+      )}
     </>
   );
 };
