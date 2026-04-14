@@ -7,12 +7,12 @@ import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { usePageSEO } from "@/hooks/usePageSEO";
 
 const statusColors: Record<string, string> = {
-  "In Progress": "bg-primary/15 text-primary",
-  "Planning": "bg-accent text-accent-foreground",
-  "Dream": "bg-muted text-foreground",
-  "Future": "bg-muted text-muted-foreground",
-  "Active": "bg-muted text-foreground",
-  "Ongoing": "bg-muted text-muted-foreground",
+  "In Progress": "bg-primary/15 text-primary border border-primary/30",
+  "Planning": "bg-muted text-foreground border border-border",
+  "Dream": "bg-muted text-muted-foreground border border-border",
+  "Future": "bg-muted text-muted-foreground border border-border",
+  "Active": "bg-primary/15 text-primary border border-primary/30",
+  "Ongoing": "bg-muted text-muted-foreground border border-border",
 };
 
 const Aspirations = () => {
@@ -33,18 +33,29 @@ const Aspirations = () => {
 
   return (
     <>
-      {heroImg?.url && (
+      {heroImg?.url ? (
         <PageHero image={heroImg.url} title="Future Aspirations" subtitle="Where I'm headed — the dreams, goals, and ambitions that fuel my journey forward." alt="Sunrise horizon" />
+      ) : (
+        <section className="bg-card border-b border-border">
+          <div className="page-section pt-24 md:pt-32 pb-16">
+            <div className="inline-flex items-center gap-2 text-primary text-sm font-mono mb-3">
+              <span className="text-muted-foreground">//</span> Looking Ahead
+            </div>
+            <h1 className="font-display text-4xl md:text-6xl font-extrabold text-foreground leading-tight tracking-tight">Future Aspirations</h1>
+          </div>
+        </section>
       )}
 
       <section className="page-section">
         <AnimatedSection>
           <div className="max-w-3xl mx-auto text-center">
-            <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3">My Vision</p>
+            <div className="inline-flex items-center gap-2 text-primary text-sm font-mono mb-3">
+              <span className="text-muted-foreground">//</span> My Vision
+            </div>
             {settings?.vision_title && (
-              <h2 className="font-display text-3xl md:text-5xl font-semibold text-foreground leading-tight mb-8">
+              <h2 className="font-display text-3xl md:text-5xl font-extrabold text-foreground leading-tight mb-8 tracking-tight">
                 {settings.vision_title.split(",")[0]},{" "}
-                <span className="text-primary">{settings.vision_title.split(",").slice(1).join(",")}</span>
+                <span className="text-primary neon-text">{settings.vision_title.split(",").slice(1).join(",")}</span>
               </h2>
             )}
             <p className="body-text">{settings?.vision_text || ""}</p>
@@ -52,10 +63,12 @@ const Aspirations = () => {
         </AnimatedSection>
       </section>
 
-      <section className="bg-card border-y border-border">
+      <section className="bg-card/50 border-y border-border/50">
         <div className="page-section">
           <AnimatedSection>
-            <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3">Roadmap</p>
+            <div className="inline-flex items-center gap-2 text-primary text-sm font-mono mb-3">
+              <span className="text-muted-foreground">//</span> Roadmap
+            </div>
             <h2 className="section-title">Goals & Milestones</h2>
           </AnimatedSection>
           <div className="grid md:grid-cols-2 gap-6 mt-12">
@@ -65,11 +78,11 @@ const Aspirations = () => {
                 <AnimatedSection key={goal.id} delay={index * 0.1}>
                   <motion.div className="skill-card h-full" whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300 }}>
                     <div className="flex items-start justify-between mb-4">
-                      <div className="bg-accent rounded-xl p-3"><Icon className="text-primary" size={24} /></div>
-                      <span className={`text-xs font-body font-medium px-3 py-1 rounded-full ${statusColors[goal.status] || "bg-muted text-muted-foreground"}`}>{goal.status}</span>
+                      <div className="bg-primary/10 border border-primary/20 rounded-xl p-3"><Icon className="text-primary" size={24} /></div>
+                      <span className={`text-xs font-mono font-medium px-3 py-1 rounded-full ${statusColors[goal.status] || "bg-muted text-muted-foreground border border-border"}`}>{goal.status}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground font-body mb-1">{goal.timeline}</p>
-                    <h3 className="font-display text-xl font-semibold text-foreground mb-3">{goal.title}</h3>
+                    <p className="text-sm text-muted-foreground font-mono mb-1">{goal.timeline}</p>
+                    <h3 className="font-display text-xl font-bold text-foreground mb-3">{goal.title}</h3>
                     <p className="body-text text-base">{goal.description}</p>
                   </motion.div>
                 </AnimatedSection>
@@ -91,15 +104,15 @@ const Aspirations = () => {
           }}
         >
           {images?.find(i => i.image_key === "bg-quote-aspirations")?.url && (
-            <div className="absolute inset-0 bg-background/80" />
+            <div className="absolute inset-0 bg-background/85 dark:bg-background/90" />
           )}
           <AnimatedSection>
             <div className="relative z-10">
-              <blockquote className="font-display text-2xl md:text-4xl font-medium text-foreground italic max-w-3xl mx-auto leading-relaxed">
-                "{settings.aspirations_quote}"
+              <blockquote className="font-display text-2xl md:text-4xl font-bold text-foreground italic max-w-3xl mx-auto leading-relaxed">
+                "<span className="text-primary">{settings.aspirations_quote}</span>"
               </blockquote>
               {settings.aspirations_quote_author && (
-                <p className="mt-6 text-muted-foreground font-body">— {settings.aspirations_quote_author}</p>
+                <p className="mt-6 text-muted-foreground font-mono text-sm">— {settings.aspirations_quote_author}</p>
               )}
             </div>
           </AnimatedSection>

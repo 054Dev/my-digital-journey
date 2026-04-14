@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import PageHero from "@/components/PageHero";
 import AnimatedSection from "@/components/AnimatedSection";
 import { Mail, MapPin, Send, CheckCircle, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
-import { useSocialLinks, useContactInfo, useSiteSettings } from "@/hooks/usePortfolioData";
+import { useSocialLinks, useContactInfo, useSiteSettings, useSiteImages } from "@/hooks/usePortfolioData";
 import { getIcon } from "@/lib/iconMap";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,7 @@ const Contact = () => {
   const { data: socialLinks, isLoading } = useSocialLinks();
   const { data: contact } = useContactInfo();
   const { data: settings } = useSiteSettings();
+  const { data: images } = useSiteImages();
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -35,6 +37,8 @@ const Contact = () => {
   });
 
   if (isLoading) return <PageSkeleton />;
+
+  const heroImg = images?.find(i => i.image_key === "hero-contact");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -56,19 +60,14 @@ const Contact = () => {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase.functions.invoke("send-contact-message", {
-        body: result.data,
-      });
-
+      const { error } = await supabase.functions.invoke("send-contact-message", { body: result.data });
       if (error) {
-        console.error("Contact form error:", error);
         toast({ title: "Error sending message", description: "Please try again later.", variant: "destructive" });
       } else {
         setSubmitted(true);
         toast({ title: "Message sent!", description: "Thank you for reaching out." });
       }
-    } catch (err) {
-      console.error("Contact submit error:", err);
+    } catch {
       toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
     } finally {
       setSubmitting(false);
@@ -84,17 +83,23 @@ const Contact = () => {
 
   return (
     <>
-      <section className="bg-secondary text-secondary-foreground">
-        <div className="page-section pt-24 md:pt-32 pb-16">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-3xl">
-            <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3">Let's Connect</p>
-            <h1 className="font-display text-4xl md:text-6xl font-bold text-secondary-foreground leading-tight mb-6">Get in Touch</h1>
-            <p className="text-xl text-secondary-foreground/80 font-body">
-              Whether it's a project idea, collaboration opportunity, or just a friendly hello — I'd love to hear from you.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      {heroImg?.url ? (
+        <PageHero image={heroImg.url} title="Get in Touch" subtitle="Whether it's a project idea, collaboration, or just a friendly hello — I'd love to hear from you." alt="Contact hero" />
+      ) : (
+        <section className="bg-card border-b border-border">
+          <div className="page-section pt-24 md:pt-32 pb-16">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 text-primary text-sm font-mono mb-3">
+                <span className="text-muted-foreground">//</span> Let's Connect
+              </div>
+              <h1 className="font-display text-4xl md:text-6xl font-extrabold text-foreground leading-tight mb-6 tracking-tight">Get in Touch</h1>
+              <p className="text-xl text-muted-foreground font-body">
+                Whether it's a project idea, collaboration opportunity, or just a friendly hello — I'd love to hear from you.
+              </p>
+            </motion.div>
+          </div>
+        </section>
+      )}
 
       <section className="page-section">
         <div className="grid md:grid-cols-5 gap-12">
@@ -102,49 +107,39 @@ const Contact = () => {
             <AnimatedSection>
               <h2 className="section-title">Send a Message</h2>
               {submitted ? (
-                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-accent rounded-2xl p-12 text-center">
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-card border border-border rounded-2xl p-12 text-center neon-border">
                   <CheckCircle className="text-primary mx-auto mb-4" size={48} />
-                  <h3 className="font-display text-2xl font-semibold text-foreground mb-2">Thank You!</h3>
+                  <h3 className="font-display text-2xl font-bold text-foreground mb-2">Thank You!</h3>
                   <p className="body-text">Your message has been received and delivered.</p>
-                  <button
-                    onClick={() => {
-                      setSubmitted(false);
-                      setFormData({ name: "", email: "", subject: "", message: "" });
-                    }}
-                    className="mt-6 text-primary font-body font-medium hover:underline"
-                  >
-                    Send another message
+                  <button onClick={() => { setSubmitted(false); setFormData({ name: "", email: "", subject: "", message: "" }); }} className="mt-6 text-primary font-mono font-medium hover:underline text-sm">
+                    sendAnother()
                   </button>
                 </motion.div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6" noValidate>
                   <div className="grid sm:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-body font-medium text-foreground mb-2">Name</label>
-                      <input id="name" name="name" type="text" value={formData.name} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all" placeholder="Your name" />
+                      <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">Name</label>
+                      <input id="name" name="name" type="text" value={formData.name} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-xl font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="Your name" />
                       {errors.name && <p className="text-destructive text-sm mt-1">{errors.name}</p>}
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-body font-medium text-foreground mb-2">Email</label>
-                      <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all" placeholder="you@example.com" />
+                      <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">Email</label>
+                      <input id="email" name="email" type="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-xl font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="you@example.com" />
                       {errors.email && <p className="text-destructive text-sm mt-1">{errors.email}</p>}
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-body font-medium text-foreground mb-2">Subject</label>
-                    <input id="subject" name="subject" type="text" value={formData.subject} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all" placeholder="What's this about?" />
+                    <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">Subject</label>
+                    <input id="subject" name="subject" type="text" value={formData.subject} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-xl font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all" placeholder="What's this about?" />
                     {errors.subject && <p className="text-destructive text-sm mt-1">{errors.subject}</p>}
                   </div>
                   <div>
-                    <label htmlFor="message" className="block text-sm font-body font-medium text-foreground mb-2">Message</label>
-                    <textarea id="message" name="message" rows={6} value={formData.message} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-lg font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all resize-none" placeholder="Your message..." />
+                    <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">Message</label>
+                    <textarea id="message" name="message" rows={6} value={formData.message} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-xl font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all resize-none" placeholder="Your message..." />
                     {errors.message && <p className="text-destructive text-sm mt-1">{errors.message}</p>}
                   </div>
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-lg font-body font-semibold text-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                  >
+                  <button type="submit" disabled={submitting} className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl font-body font-semibold text-lg hover:bg-primary/90 transition-all hover:shadow-[0_0_25px_hsl(var(--primary)/0.4)] disabled:opacity-50">
                     <Send size={18} /> {submitting ? "Sending..." : "Send Message"}
                   </button>
                 </form>
@@ -158,43 +153,43 @@ const Contact = () => {
               <div className="space-y-6 mb-10">
                 {contact?.email && (
                   <div className="flex items-start gap-4">
-                    <div className="bg-accent rounded-xl p-3 shrink-0"><Mail className="text-primary" size={20} /></div>
+                    <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 shrink-0"><Mail className="text-primary" size={20} /></div>
                     <div>
                       <p className="font-body font-medium text-foreground">Email</p>
-                      <a href={`mailto:${contact.email}`} className="text-muted-foreground hover:text-primary transition-colors">{contact.email}</a>
+                      <a href={`mailto:${contact.email}`} className="text-muted-foreground hover:text-primary transition-colors font-mono text-sm">{contact.email}</a>
                     </div>
                   </div>
                 )}
                 {contact?.phone && (
                   <div className="flex items-start gap-4">
-                    <div className="bg-accent rounded-xl p-3 shrink-0"><Phone className="text-primary" size={20} /></div>
+                    <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 shrink-0"><Phone className="text-primary" size={20} /></div>
                     <div>
                       <p className="font-body font-medium text-foreground">Phone</p>
-                      <a href={`tel:${contact.phone}`} className="text-muted-foreground hover:text-primary transition-colors">{contact.phone}</a>
+                      <a href={`tel:${contact.phone}`} className="text-muted-foreground hover:text-primary transition-colors font-mono text-sm">{contact.phone}</a>
                     </div>
                   </div>
                 )}
                 {contact?.location && (
                   <div className="flex items-start gap-4">
-                    <div className="bg-accent rounded-xl p-3 shrink-0"><MapPin className="text-primary" size={20} /></div>
+                    <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 shrink-0"><MapPin className="text-primary" size={20} /></div>
                     <div>
                       <p className="font-body font-medium text-foreground">Location</p>
-                      <p className="text-muted-foreground">{contact.location}</p>
+                      <p className="text-muted-foreground font-mono text-sm">{contact.location}</p>
                     </div>
                   </div>
                 )}
               </div>
 
-              <h3 className="font-display text-xl font-semibold text-foreground mb-4">Find Me Online</h3>
+              <h3 className="font-display text-xl font-bold text-foreground mb-4">Find Me Online</h3>
               <div className="space-y-4">
                 {socialLinks?.map((social) => {
                   const Icon = getIcon(social.icon_name);
                   return (
                     <a key={social.id} href={social.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
-                      <div className="bg-accent rounded-xl p-3 group-hover:bg-primary/10 transition-colors"><Icon className="text-primary" size={20} /></div>
+                      <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 group-hover:bg-primary/20 transition-colors"><Icon className="text-primary" size={20} /></div>
                       <div>
                         <p className="font-body font-medium text-foreground group-hover:text-primary transition-colors">{social.platform}</p>
-                        <p className="text-sm text-muted-foreground">{social.handle}</p>
+                        <p className="text-sm text-muted-foreground font-mono">{social.handle}</p>
                       </div>
                     </a>
                   );
@@ -202,7 +197,7 @@ const Contact = () => {
               </div>
 
               {contact?.availability_status && (
-                <div className="mt-10 bg-accent rounded-2xl p-6">
+                <div className="mt-10 bg-card border border-border rounded-2xl p-6 neon-border">
                   <div className="flex items-center gap-2 mb-3">
                     <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${statusColor}`} />
                     <span className="font-body text-sm font-medium text-foreground">

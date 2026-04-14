@@ -1,6 +1,7 @@
 import { useState } from "react";
+import PageHero from "@/components/PageHero";
 import AnimatedSection from "@/components/AnimatedSection";
-import { useResumeFiles, useSiteSettings } from "@/hooks/usePortfolioData";
+import { useResumeFiles, useSiteSettings, useSiteImages } from "@/hooks/usePortfolioData";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { FileText, Download, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import { usePageSEO } from "@/hooks/usePageSEO";
 const Resume = () => {
   const { data: files, isLoading } = useResumeFiles();
   const { data: settings } = useSiteSettings();
+  const { data: images } = useSiteImages();
   const [previewFile, setPreviewFile] = useState<{ url: string; name: string } | null>(null);
 
   usePageSEO({
@@ -22,25 +24,37 @@ const Resume = () => {
 
   if (isLoading) return <PageSkeleton />;
 
+  const heroImg = images?.find((i) => i.image_key === "hero-resume");
   const resumeFile = files?.find((f) => f.file_type === "resume");
   const cvFile = files?.find((f) => f.file_type === "cv");
   const allFiles = [resumeFile, cvFile].filter(Boolean);
 
   return (
     <>
-      <section className="bg-secondary text-secondary-foreground">
-        <div className="page-section pt-24 md:pt-32 pb-16">
-          <div className="max-w-3xl">
-            <p className="font-body text-primary uppercase tracking-[0.2em] text-sm mb-3">Documents</p>
-            <h1 className="font-display text-4xl md:text-6xl font-bold text-secondary-foreground leading-tight mb-6">
-              Resume & CV
-            </h1>
-            <p className="text-xl text-secondary-foreground/80 font-body">
-              Download my resume or CV to learn more about my qualifications and experience.
-            </p>
+      {heroImg?.url ? (
+        <PageHero
+          image={heroImg.url}
+          title="Resume & CV"
+          subtitle="Download my resume or CV to learn more about my qualifications and experience."
+          alt="Resume hero"
+        />
+      ) : (
+        <section className="bg-card border-b border-border">
+          <div className="page-section pt-24 md:pt-32 pb-16">
+            <div className="max-w-3xl">
+              <div className="inline-flex items-center gap-2 text-primary text-sm font-mono mb-3">
+                <span className="text-muted-foreground">//</span> Documents
+              </div>
+              <h1 className="font-display text-4xl md:text-6xl font-extrabold text-foreground leading-tight mb-6 tracking-tight">
+                Resume & CV
+              </h1>
+              <p className="text-xl text-muted-foreground font-body">
+                Download my resume or CV to learn more about my qualifications and experience.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="page-section">
         {allFiles.length > 0 ? (
@@ -50,18 +64,14 @@ const Resume = () => {
               const label = file.file_type === "resume" ? "Resume" : "CV";
               return (
                 <AnimatedSection key={file.id}>
-                  <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <Card className="overflow-hidden hover:shadow-lg transition-shadow neon-border">
                     <CardContent className="p-8 text-center">
                       <FileText className="text-primary mx-auto mb-4" size={56} />
-                      <h2 className="font-display text-2xl font-semibold text-foreground mb-2">{label}</h2>
-                      <p className="text-muted-foreground mb-6 text-sm">{file.file_name}</p>
+                      <h2 className="font-display text-2xl font-bold text-foreground mb-2">{label}</h2>
+                      <p className="text-muted-foreground mb-6 text-sm font-mono">{file.file_name}</p>
                       <div className="flex gap-3 justify-center">
                         {file.file_url.endsWith(".pdf") && (
-                          <Button
-                            variant="outline"
-                            size="lg"
-                            onClick={() => setPreviewFile({ url: file.file_url, name: label })}
-                          >
+                          <Button variant="outline" size="lg" onClick={() => setPreviewFile({ url: file.file_url, name: label })}>
                             <Eye size={18} /> Preview
                           </Button>
                         )}
@@ -81,10 +91,8 @@ const Resume = () => {
           <AnimatedSection>
             <div className="text-center py-16">
               <FileText className="text-muted-foreground mx-auto mb-4" size={48} />
-              <h2 className="font-display text-2xl font-semibold text-foreground mb-2">No Documents Yet</h2>
-              <p className="text-muted-foreground">
-                Resume and CV will appear here once uploaded via the admin setup page.
-              </p>
+              <h2 className="font-display text-2xl font-bold text-foreground mb-2">No Documents Yet</h2>
+              <p className="text-muted-foreground">Resume and CV will appear here once uploaded via the admin setup page.</p>
             </div>
           </AnimatedSection>
         )}
@@ -95,19 +103,9 @@ const Resume = () => {
           <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0">
             <DialogTitle>{previewFile?.name} Preview</DialogTitle>
           </DialogHeader>
-          <div
-            className="flex-1 overflow-hidden px-6 pb-6"
-            style={{ userSelect: "none" }}
-            onCopy={(e) => e.preventDefault()}
-            onContextMenu={(e) => e.preventDefault()}
-          >
+          <div className="flex-1 overflow-hidden px-6 pb-6" style={{ userSelect: "none" }} onCopy={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()}>
             {previewFile && (
-              <iframe
-                src={`${previewFile.url}#toolbar=0&navpanes=0`}
-                className="w-full h-full rounded-lg border border-border"
-                title={`${previewFile.name} Preview`}
-                style={{ pointerEvents: "auto" }}
-              />
+              <iframe src={`${previewFile.url}#toolbar=0&navpanes=0`} className="w-full h-full rounded-lg border border-border" title={`${previewFile.name} Preview`} style={{ pointerEvents: "auto" }} />
             )}
           </div>
         </DialogContent>
