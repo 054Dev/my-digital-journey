@@ -18,7 +18,7 @@ const PageHero = ({ image, title, subtitle, alt }: PageHeroProps) => {
       <img
         src={image}
         alt={alt}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? "opacity-100" : "opacity-0"}`}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${loaded ? "opacity-40 dark:opacity-25" : "opacity-0"}`}
         loading="lazy"
         onLoad={() => setLoaded(true)}
       />
@@ -28,7 +28,7 @@ const PageHero = ({ image, title, subtitle, alt }: PageHeroProps) => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="font-display text-4xl md:text-6xl font-bold text-primary-foreground leading-tight"
+          className="font-display text-4xl md:text-6xl font-extrabold text-foreground leading-tight neon-text tracking-tight"
         >
           {title}
         </motion.h1>
@@ -37,7 +37,7 @@ const PageHero = ({ image, title, subtitle, alt }: PageHeroProps) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-4 text-xl text-primary-foreground/80 font-body max-w-2xl"
+            className="mt-4 text-xl text-muted-foreground font-body max-w-2xl"
           >
             {subtitle}
           </motion.p>
