@@ -10,12 +10,7 @@ const Childhood = () => {
   const { data: settings, isLoading: loadingSettings } = useSiteSettings();
   const { data: images } = useSiteImages();
 
-  usePageSEO({
-    title: "Childhood",
-    description: settings?.full_name
-      ? `Discover the childhood and formative years of ${settings.full_name}.`
-      : "Childhood memories and formative experiences.",
-  });
+  usePageSEO({ path: "/childhood" });
 
   if (loadingEvents || loadingSettings) return <PageSkeleton />;
 
