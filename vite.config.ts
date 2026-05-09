@@ -60,9 +60,14 @@ const seoPrerenderPlugin = (): Plugin => ({
         .replace(/<meta name="twitter:title" content=".*?"\s*\/?\>/, `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`)
         .replace(/<meta name="twitter:description" content=".*?"\s*\/?\>/, `<meta name="twitter:description" content="${escapeHtml(meta.description)}" />`);
 
+      if (route === "/") {
+        htmlAsset.source = html;
+        return;
+      }
+
       this.emitFile({
         type: "asset",
-        fileName: route === "/" ? "index.html" : `${route.slice(1)}/index.html`,
+        fileName: `${route.slice(1)}/index.html`,
         source: html,
       });
     });
