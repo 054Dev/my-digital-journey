@@ -1,4 +1,5 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
+import type { OutputBundle } from "rollup";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
@@ -39,16 +40,17 @@ const routeHtml = {
 const escapeHtml = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const seoPrerenderPlugin = () => ({
+const seoPrerenderPlugin = (): Plugin => ({
   name: "seo-prerender-routes",
-  generateBundle(_: unknown, bundle: Record<string, { type: string; source?: string }>) {
+  generateBundle(_, bundle: OutputBundle) {
     const htmlAsset = bundle["index.html"];
     if (!htmlAsset || htmlAsset.type !== "asset" || typeof htmlAsset.source !== "string") return;
+    const source = htmlAsset.source;
 
     staticRoutes.forEach((route) => {
       const meta = routeHtml[route as keyof typeof routeHtml];
       const canonical = `${siteUrl}${route === "/" ? "/" : route}`;
-      const html = htmlAsset.source
+      const html = source
         .replace(/<title>.*?<\/title>/, `<title>${escapeHtml(meta.title)}</title>`)
         .replace(/<meta name="description" content=".*?"\s*\/?\>/, `<meta name="description" content="${escapeHtml(meta.description)}" />`)
         .replace(/<link rel="canonical" href=".*?"\s*\/?\>/, `<link rel="canonical" href="${canonical}" />`)
