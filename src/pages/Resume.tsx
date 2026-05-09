@@ -13,12 +13,7 @@ const Resume = () => {
   const { data: settings } = useSiteSettings();
   const [previewFile, setPreviewFile] = useState<{ url: string; name: string } | null>(null);
 
-  usePageSEO({
-    title: "Resume & CV",
-    description: settings?.full_name
-      ? `Download the resume and CV of ${settings.full_name}.`
-      : "Resume and CV documents.",
-  });
+  usePageSEO({ path: "/resume" });
 
   if (isLoading) return <PageSkeleton />;
 
