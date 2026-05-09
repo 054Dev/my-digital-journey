@@ -27,12 +27,7 @@ const Contact = () => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  usePageSEO({
-    title: "Contact",
-    description: settings?.full_name
-      ? `Get in touch with ${settings.full_name}. Send a message or connect via social media.`
-      : "Contact page — send a message or connect online.",
-  });
+  usePageSEO({ path: "/contact" });
 
   if (isLoading) return <PageSkeleton />;
 
