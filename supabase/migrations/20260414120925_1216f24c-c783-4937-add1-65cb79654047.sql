@@ -1,1 +1,0 @@
-ALTER TABLE public.site_images ADD COLUMN IF NOT EXISTS theme_mode text NOT NULL DEFAULT 'both';

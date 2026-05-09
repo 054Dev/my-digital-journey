@@ -332,7 +332,6 @@ export type Database = {
           created_at: string
           id: string
           image_key: string
-          theme_mode: string
           updated_at: string
           url: string
         }
@@ -341,7 +340,6 @@ export type Database = {
           created_at?: string
           id?: string
           image_key: string
-          theme_mode?: string
           updated_at?: string
           url?: string
         }
@@ -350,7 +348,6 @@ export type Database = {
           created_at?: string
           id?: string
           image_key?: string
-          theme_mode?: string
           updated_at?: string
           url?: string
         }
