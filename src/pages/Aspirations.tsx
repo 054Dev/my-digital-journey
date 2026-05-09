@@ -20,12 +20,7 @@ const Aspirations = () => {
   const { data: settings, isLoading: loadingSettings } = useSiteSettings();
   const { data: images } = useSiteImages();
 
-  usePageSEO({
-    title: "Aspirations",
-    description: settings?.full_name
-      ? `Future goals, dreams and aspirations of ${settings.full_name}.`
-      : "Future aspirations and career goals.",
-  });
+  usePageSEO({ path: "/aspirations" });
 
   if (isLoading || loadingSettings) return <PageSkeleton />;
 
