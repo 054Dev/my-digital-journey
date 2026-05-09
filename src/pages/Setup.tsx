@@ -18,6 +18,7 @@ import SetupResume from "@/components/setup/SetupResume";
 import SetupImages from "@/components/setup/SetupImages";
 import SetupTheme from "@/components/setup/SetupTheme";
 import SetupMessages from "@/components/setup/SetupMessages";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,6 +81,8 @@ const Setup = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const [pendingLeave, setPendingLeave] = useState<(() => void) | null>(null);
+
+  usePageSEO({ title: "Admin Setup", path: "/setup", noIndex: true });
 
   // Track unsaved changes via beforeunload
   useEffect(() => {
