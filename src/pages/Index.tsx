@@ -18,10 +18,7 @@ const Index = () => {
   const { data: settings, isLoading } = useSiteSettings();
   const { data: images } = useSiteImages();
 
-  usePageSEO({
-    title: settings?.full_name ? `${settings.full_name} — Personal Portfolio` : undefined,
-    description: settings?.bio_short || "Personal portfolio showcasing life journey, skills, and aspirations.",
-  });
+  usePageSEO({ path: "/" });
 
   if (isLoading) return <PageSkeleton />;
 

@@ -13,12 +13,7 @@ const Education = () => {
   const { data: images } = useSiteImages();
   const { data: settings } = useSiteSettings();
 
-  usePageSEO({
-    title: "Education",
-    description: settings?.full_name
-      ? `Academic journey and education of ${settings.full_name}.`
-      : "Education background and academic achievements.",
-  });
+  usePageSEO({ path: "/education" });
 
   if (isLoading) return <PageSkeleton />;
 

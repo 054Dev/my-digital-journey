@@ -26,12 +26,7 @@ const Skills = () => {
   const { data: images } = useSiteImages();
   const { data: settings } = useSiteSettings();
 
-  usePageSEO({
-    title: "Skills & Projects",
-    description: settings?.full_name
-      ? `Technical skills, projects and creative pursuits of ${settings.full_name}.`
-      : "Skills, projects and creative work.",
-  });
+  usePageSEO({ path: "/skills" });
 
   if (isLoading) return <PageSkeleton />;
 
